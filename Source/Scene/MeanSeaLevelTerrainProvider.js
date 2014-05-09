@@ -194,10 +194,37 @@ define([
         // The buffer is an array that holds 17 x 17 height values.
         // It is a single dimensional array, row major, south to north and west to east.
         var heightBuffer = [];
-        var deltaLat = (rectangle.north - rectangle.south) / 16.0;
-        var deltaLon = (rectangle.east - rectangle.west) / 16.0;
-        for (var lat = rectangle.south; lat <= rectangle.north; lat += deltaLat){
-            for (var lon = rectangle.west; lon <= rectangle.east; lon += deltaLon){
+
+        var deltaLat = (rectangle.north - rectangle.south) / (provider._heightmapWidth - 1);
+        var deltaLon = (rectangle.east - rectangle.west) / (provider._heightmapHeight - 1);
+
+        for (var i = 0; i < provider._heightmapWidth; i ++){
+
+            // We'll take a little extra care here to avoid numerical precision problems on our boundaries
+            var lat;
+            if (i === 0){
+                lat = rectangle.south;
+            }
+            else if (i === provider._heightmapWidth - 1){
+                lat = rectangle.north;
+            }
+            else{
+                lat = rectangle.south + i * deltaLat;
+            }
+
+            for (var j = 0; j < provider._heightmapHeight; j++){
+
+                var lon;
+                if (j === 0){
+                    lon = rectangle.west;
+                }
+                else if (j === provider._heightmapHeight - 1){
+                    lon = rectangle.east;
+                }
+                else{
+                    lon = rectangle.west + j * deltaLon;
+                }
+
                 heightBuffer.push(bilinearInterpolation(provider, lon, lat));
             }
         }
